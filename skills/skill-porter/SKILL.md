@@ -1,6 +1,6 @@
 ---
 name: skill-porter
-description: "Imports, converts, and optimizes external agent skills (Claude Code, Cursor, generic LLMs) into native Google Antigravity plugins and skills."
+description: "Preview conservative tool-name translations and copy complete local skill bundles for manual adaptation to Google Antigravity."
 category: developer-tools
 risk: critical
 source: community
@@ -11,73 +11,90 @@ author: Pranav-Nexus
 tags: [antigravity, claude, skills, migration, agent]
 tools: [claude, cursor, gemini]
 license: "MIT"
-license_source: "https://github.com/Pranav-Nexus/antigravity-skill-porter/blob/main/LICENSE"
+license_source: "https://github.com/Pranav-Nexus/antigravity-skill-porter/blob/7a5b42c0fe1be283ae9f5b5fe70792aa78733af7/LICENSE"
 ---
 
-# Skill Porter & Optimizer for Google Antigravity
-
-## Overview
-
-Imports, converts, and optimizes external agent skills created for Claude Code, Cursor, Codex, or OpenAI into native Google Antigravity multi-agent plugins. It translates serial subagent patterns into Antigravity parallel `invoke_subagent` calls, maps legacy tool references (`view_file`, `replace_file_content`, `run_command`), and standardizes context anchoring to `GEMINI.md` and `AGENTS.md`.
+# Skill Porter for Google Antigravity
 
 ## When to Use
 
-- When importing or adapting skills from Claude Code or Cursor into Google Antigravity.
-- When migrating multi-agent workflows that benefit from Antigravity parallel subagent execution.
-- When converting single SKILL.md files or multi-skill directories and plugin bundles.
-- When standardizing tool conventions and artifact generation for Antigravity workspaces.
+Use when adapting a locally obtained Claude Code, Cursor, Codex, or generic agent
+skill bundle for Google Antigravity. The utility preserves support files and
+previews limited tool-name substitutions; it does not prove client compatibility.
 
-## How It Works
+## Prerequisites
 
-### Step 1: Source Identification
+- Python 3.9+; standard library only.
+- A reviewed local skill directory containing `SKILL.md`, that file itself, or a
+  repository with `skills/<lowercase-hyphenated-id>/SKILL.md` directories.
+- Verify the upstream identity, pinned revision, license and complete bundle first.
+  Obtain remote material separately through your reviewed download/clone workflow.
+- Use stable local directories you control. Do not run against a tree being
+  modified by another process or user. Inspect scripts without executing them.
 
-Specify the source skill or repository:
-- Local skill folder or `SKILL.md` file path
-- Remote GitHub repository URL (e.g., `https://github.com/owner/repo`)
+## Workflow
 
-### Step 2: AST & Deterministic Translation
+1. From this skill directory, preview the local bundle:
 
-Run the bundled porting utility from the skill's scripts directory:
+   ```bash
+   python3 scripts/port_skill.py --source "/absolute/path/my-skill" --dry-run
+   ```
 
-```bash
-# Using the bundled utility for Antigravity IDE:
-python scripts/port_skill.py --source "<source-path-or-url>" --dest "~/.agents/skills"
+2. Review the diff. Only exact backtick-quoted tool identifiers such as `View`,
+   `Edit`, and `Bash` change. Frontmatter and support bytes remain intact. Verify
+   each target tool and its argument semantics in your actual client.
+3. Copy to a fresh staging destination, then inspect before activating:
 
-# Or for Antigravity CLI (agy):
-python scripts/port_skill.py --source "<source-path-or-url>" --dest "~/.gemini/antigravity-cli/skills"
+   ```bash
+   python3 scripts/port_skill.py --source "/absolute/path/my-skill" --dest "/absolute/path/staging"
+   ```
 
-# Or preview transformations without writing (safe read-only mode):
-python scripts/port_skill.py --source "<source-path-or-url>" --dry-run
-```
+   Existing skill destinations are rejected; no global paths are written.
+4. When the user requests workspace installation, verify the current project:
 
-The converter performs:
-1. **Tool Standardizing**: Maps `View` -> `view_file`, `Edit` -> `replace_file_content`, `Bash` -> `run_command`, `Grep` -> `grep_search`, `Find` -> `find_by_name`.
-2. **Subagent Parallelization**: Transforms serial subagent invocations into native parallel `invoke_subagent` arrays.
-3. **Artifact Generation**: Converts standard markdown code outputs into Antigravity interactive artifacts.
-4. **Context Anchoring**: Migrates `CLAUDE.md` and `CURSOR.md` references to `GEMINI.md` and `AGENTS.md`.
+   ```bash
+   python3 scripts/port_skill.py --source "/absolute/path/my-skill" --workspace --dry-run
+   python3 scripts/port_skill.py --source "/absolute/path/my-skill" --workspace
+   ```
 
-### Step 3: Verification & Installation
-
-Verify the converted skill passes frontmatter schema checks and test invoking it within Antigravity.
+   This writes only `.agents/skills/<id>` under the current working directory.
+   Confirm that discovery path is supported by the intended host first.
+5. Review context-file references, tool argument shapes, client configuration,
+   dependencies, licensing and multi-agent ordering manually. Validate the adapted
+   skill and test actual client invocation before claiming compatibility.
 
 ## Examples
 
-### Example 1: Converting a Remote Claude Skill
+For a multi-skill repository, use its local root as the source:
 
 ```bash
-python scripts/port_skill.py --source "https://github.com/anthropics/skills/tree/main/skills/frontend-design" --dest "~/.agents/skills"
+python3 scripts/port_skill.py --source "/absolute/path/reviewed-repository" --dry-run
+python3 scripts/port_skill.py --source "/absolute/path/reviewed-repository" --dest "/absolute/path/fresh-output"
 ```
 
-### Example 2: Workspace-Scoped Port
+A source-only invocation defaults to preview. Remote URLs are rejected; obtain
+and inspect a pinned local checkout first. Run bundled tests from this directory:
 
 ```bash
-python scripts/port_skill.py --source "./my-claude-skill" --workspace
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts/test_port_skill.py -v
 ```
 
 ## Limitations
 
-- **Untrusted Source Code**: Always inspect and audit third-party skills and executable scripts before running them or granting filesystem permissions.
-- **State-Changing Operations**: Because this utility writes files and can clone remote repositories, preview changes first with `--dry-run` or inspect downloaded content before full installation.
-- **Semantic Prompt Nuances**: While structural tool bindings and subagent calls are rewritten deterministically, complex custom prompt policies may still require manual review and verification.
-- **External MCP Prerequisites**: Skills that rely on specialized proprietary MCP servers require that the corresponding server be separately declared in your `mcp_config.json`.
-- **Environment Compatibility**: The automated converter targets Google Antigravity >= 1.0.0; older preview formats are not backwards compatible.
+- Conservative text adaptation only: no AST conversion, semantic optimization,
+  automatic parallelization, artifact generation, or compatibility certification.
+- Context references and support scripts retain their original bytes and may need
+  manual adaptation. Binary support files are copied intact, never interpreted.
+- Symbolic links and non-regular files are rejected. Input is bounded to 1,000 files
+  and 20 MiB. This is not a sandbox against concurrent hostile filesystem changes;
+  use only stable directories you control.
+- Disk or filesystem failure may leave a partial new destination. Inspect it and
+  choose a fresh output for retries. There is no overwrite or rollback mode.
+- No downloads, credentials, network calls, global installation, plugin manifest
+  generation/registration or external MCP setup. Verify tool availability in the
+  actual host, whose version and capabilities may differ.
+
+## Source and license
+
+Adapted from Pranav-Nexus/antigravity-skill-porter. The upstream MIT notice is
+preserved in [LICENSE](LICENSE).

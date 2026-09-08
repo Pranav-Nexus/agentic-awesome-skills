@@ -517,6 +517,8 @@ Key source families include:
 
 ### Community Contributors
 
+- **[Pranav-Nexus/antigravity-skill-porter](https://github.com/Pranav-Nexus/antigravity-skill-porter)**: MIT source for `skill-porter`, adapted for conservative local bundle previews and complete support-file copying.
+
 - **[chenli-yy/entropy-box-public](https://github.com/chenli-yy/entropy-box-public)**: Source for the `entropy-box` skill - grounded embodied-AI research and workflow assembly through Consult, Search, Lookup, Evidence, and the Panorama Graph, with public-service privacy and physical-system safety boundaries (CC BY 4.0).
 - **[Junaid-PK/laravel-development-workflow](https://github.com/Junaid-PK/laravel-development-workflow)**: Source for the `laravel-development-workflow` skill - root-cause Laravel bug fixes and repository-native feature work with regression coverage and risk-based verification (MIT).
 - **[Sketchjar/stipple-agent-skills](https://github.com/Sketchjar/stipple-agent-skills)**: Source for seven Stipple-backed document trust skills covering document forensics, identity-pack gaps, grounded extraction, citation checks, AI-text triage, adverse-media review, and AU/NZ tender matching, with explicit hosted-data and human-review boundaries (Apache-2.0).
