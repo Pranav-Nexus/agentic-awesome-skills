@@ -2,7 +2,7 @@
 name: skill-porter
 description: "Imports, converts, and optimizes external agent skills (Claude Code, Cursor, generic LLMs) into native Google Antigravity plugins and skills."
 category: developer-tools
-risk: safe
+risk: critical
 source: community
 source_repo: Pranav-Nexus/antigravity-skill-porter
 source_type: community
@@ -46,7 +46,7 @@ python scripts/port_skill.py --source "<source-path-or-url>" --dest "~/.agents/s
 # Or for Antigravity CLI (agy):
 python scripts/port_skill.py --source "<source-path-or-url>" --dest "~/.gemini/antigravity-cli/skills"
 
-# Or preview transformations without writing:
+# Or preview transformations without writing (safe read-only mode):
 python scripts/port_skill.py --source "<source-path-or-url>" --dry-run
 ```
 
@@ -77,6 +77,7 @@ python scripts/port_skill.py --source "./my-claude-skill" --workspace
 ## Limitations
 
 - **Untrusted Source Code**: Always inspect and audit third-party skills and executable scripts before running them or granting filesystem permissions.
+- **State-Changing Operations**: Because this utility writes files and can clone remote repositories, preview changes first with `--dry-run` or inspect downloaded content before full installation.
 - **Semantic Prompt Nuances**: While structural tool bindings and subagent calls are rewritten deterministically, complex custom prompt policies may still require manual review and verification.
 - **External MCP Prerequisites**: Skills that rely on specialized proprietary MCP servers require that the corresponding server be separately declared in your `mcp_config.json`.
 - **Environment Compatibility**: The automated converter targets Google Antigravity >= 1.0.0; older preview formats are not backwards compatible.
